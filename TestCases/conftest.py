@@ -1,6 +1,7 @@
 import os
 import platform
 import shutil
+import time
 
 import allure
 import pytest
@@ -45,14 +46,29 @@ def pytest_runtest_makereport(item):
     report = outcome.get_result()
 
     if report.when == "call" and report.failed:
-        driver = item.funcargs.get("init_driver")
-        if driver:
-            allure.attach(
-                driver.get_screenshot_as_png(),
-                name="Failure Screenshot",
-                attachment_type=AttachmentType.PNG
-            )
+        driver = getattr(item.instance, "driver", None)
 
+        # Try to get driver from fixture if class-level driver not found
+        for arg in item.funcargs.values():
+            if hasattr(arg, "driver"):
+                driver = arg.driver
+                break
 
-def _capture_screenshot(name, driver):
-    driver.save_screenshot(name)
+        if driver is None:
+            print(f"Driver not found for test: {item.name}")
+            return
+
+        screenshots_dir = os.path.join(global_var.ROOT_DIR, "Artifacts", "screenshots")
+        os.makedirs(screenshots_dir, exist_ok=True)
+
+        timestamp = int(time.time())
+        screenshot_path = os.path.join(screenshots_dir, f"{item.name}_{timestamp}.png")
+
+        driver.save_screenshot(screenshot_path)
+        print(f"Screenshot saved at: {screenshot_path}")
+
+        allure.attach(
+            driver.get_screenshot_as_png(),
+            name=f"Failure Screenshot - {item.name}",
+            attachment_type=AttachmentType.PNG
+        )

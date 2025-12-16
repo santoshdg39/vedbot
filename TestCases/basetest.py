@@ -16,16 +16,26 @@ class BaseTest:
     def init_driver(self, request, rp_logger):
         browser = request.config.getoption("--browser")
         headless = False
+
         self.category = request.config.getoption("-m")
         if self.category == "":
             self.category = "sanity"
+
         self.url = ReadProp.get_config_data("site_config.ini", self.category, "site_url")
         self.log = rp_logger
+
         self.log.info("URL: " + self.url)
+
         self.driver = DriverManager.drivermanager(browser, headless)
+
+        # CRITICAL LINE (for screenshot hook)
+        request.cls.driver = self.driver
+
         self.driver.maximize_window()
         self.driver.get(self.url)
+
         yield self.driver
+
         self.driver.close()
         self.driver.quit()
 

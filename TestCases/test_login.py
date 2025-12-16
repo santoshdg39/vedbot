@@ -14,6 +14,6 @@ class TestLogin(BaseTest):
     @pytest.mark.sanity
     def test_login_002(self, load_pages):
         self.log.info("created login page")
-        self.loginPage.login(self.username, "dadmin123")
+        self.loginPage.login(self.username, "admin123")
         assert self.loginPage.is_login_error_displayed(), "Invalid credentials message is not displayed"
 
