@@ -5,6 +5,7 @@
 **VedBot** is a Selenium–PyTest based test automation framework designed to automate web application testing using industry-standard best practices. The framework follows the **Page Object Model (POM)** design pattern to ensure scalability, maintainability, and reusability of test code.
 
 This project demonstrates real-world automation skills such as structured test design, reusable utilities, reporting, and failure analysis.
+
 Test Website: https://opensource-demo.orangehrmlive.com/
 
 ##  Tech Stack
