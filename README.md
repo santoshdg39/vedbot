@@ -21,21 +21,21 @@ Version Control: Git & GitHub
 
 Ved_Bot/
 │
-├── Config/                 # Global configuration and path variables
-├── Pages/                  # Page Object classes
-│   ├── BasePage/           # Common reusable page methods (waits, find, click)
-│   └── login/              # Login page objects and locators
+├── Config/ # Global configuration and path variables
+├── Pages/ # Page Object classes
+│ ├── BasePage/ # Common reusable page methods (waits, find, click)
+│ └── login/ # Login page objects and locators
 │
-├── TestCases/              # PyTest test classes
-├── TESTDATA/               # Test data files (Excel, configs)
-├── Artifacts/              # Generated artifacts
-│   ├── screenshots/        # Failure screenshots
-│   └── Logs/               # Execution logs
+├── TestCases/ # PyTest test classes
+├── TESTDATA/ # Test data files (Excel, configs)
+├── Artifacts/ # Generated artifacts
+│ ├── screenshots/ # Failure screenshots
+│ └── Logs/ # Execution logs
 │
-├── Report/                 # Allure report output
-├── conftest.py             # PyTest fixtures & hooks (driver, screenshots, reporting)
-├── requirements.txt        # Project dependencies
-└── README.md               # Project documentation
+├── Report/ # Allure report output
+├── conftest.py # PyTest fixtures & hooks (driver, screenshots, reporting)
+├── requirements.txt # Project dependencies
+└── README.md # Project documentation
 
 
 ### How to Run Tests
