@@ -1,5 +1,7 @@
 # VedBot – Test Automation Framework
-
+# http://localhost:9090/
+usename- santoshdg39
+password- Santosh24#
 ## Project Overview
 
 **VedBot** is a Selenium–PyTest based test automation framework designed to automate web application testing using industry-standard best practices. The framework follows the **Page Object Model (POM)** design pattern to ensure scalability, maintainability, and reusability of test code.
