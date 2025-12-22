@@ -72,3 +72,4 @@ def pytest_runtest_makereport(item):
             name=f"Failure Screenshot - {item.name}",
             attachment_type=AttachmentType.PNG
         )
+

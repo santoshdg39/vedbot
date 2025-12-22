@@ -6,6 +6,8 @@ from Pages.dashboard.dashboard_page import DashboardPage
 from Pages.dashboard.dashboard_page_locators import DashBoardPageLocators
 from Pages.login.login_page import LoginPage
 from Pages.login.login_page_locators import LoginPageLocators
+from Pages.pim.pim_page import PimPage
+from Pages.pim.pim_page_locators import PimPageLocators
 
 """ Initialize driver, browser and redirect to URL and after completing test close the driver"""
 
@@ -44,10 +46,17 @@ class BaseTest:
         # Initialize the LoginPage object with driver, logger, and category
         self.loginPage = LoginPage(self.driver, self.log, self.category)
         self.dashboardPage = DashboardPage(self.driver, self.log, self.category)
+        self.pimPage = PimPage(self.driver, self.log, self.category)
         # Initialize the locators as an instance
         self.loginpagelocators = LoginPageLocators()
         self.dashboardPageLocators = DashBoardPageLocators()
+        self.pimPageLocators = PimPageLocators()
 
         # Read credentials from the config file
         self.username = ReadProp.get_config_data("site_config.ini", self.category, "username")
         self.password = ReadProp.get_config_data("site_config.ini", self.category, "password")
+
+
+
+
+
