@@ -30,3 +30,7 @@ class LoginPage(BasePage):
     def is_login_error_displayed(self):
         return self.is_displayed(self.loginPageLocators.ERROR_MESSAGE)
 
+    def logout_employee(self):
+        self.click_after_wait(self.loginPageLocators.user_profile_dropdown)
+        self.click_after_wait(self.loginPageLocators.logout_button)
+        assert self.is_displayed(self.loginPageLocators.login_page), "Login page is not displayed"
