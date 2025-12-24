@@ -10,4 +10,7 @@ class LoginPageLocators:
     logout_button = (By.XPATH, "//a[normalize-space()='Logout']")
     login_page = (By.XPATH, "//h5[@class='oxd-text oxd-text--h5 orangehrm-login-title']")
     user_dropdown_name = (By.XPATH, "//p[@class='oxd-userdropdown-name']")
+    account_disabled_msg = (By.XPATH,"//p[contains(@class,'oxd-alert-content-text')]")
+
+
 
