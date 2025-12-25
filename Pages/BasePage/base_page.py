@@ -10,6 +10,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 from Pages.dashboard.dashboard_page_locators import DashBoardPageLocators
 from Pages.login.login_page_locators import LoginPageLocators
+from Pages.pim.pim_page_locators import PimPageLocators
 
 
 class BasePage:
@@ -19,6 +20,7 @@ class BasePage:
         self.wait = WebDriverWait(self.driver, 120)
         self.loginPageLocators = LoginPageLocators
         self.dashboardPageLocators = DashBoardPageLocators
+        self.pimPageLocators = PimPageLocators
 
     def open_page(self, url):
         self.driver.get(url)
@@ -88,7 +90,8 @@ class BasePage:
         today_date = datetime.now()
         return today_date.strftime("%d%b%y%H%M")
 
-    def click_after_wait(self, by_locator):
+    def click_after_wait(self, by_locator, timeout=15):
+        self.wait_for_loader_to_disappear(timeout=timeout)
         try:
             self.wait.until(EC.visibility_of_element_located(by_locator))
             element = self.wait.until(EC.element_to_be_clickable(by_locator))
@@ -178,7 +181,10 @@ class BasePage:
     def get_text_value(self, locator):
         try:
             element = self.wait_for_element_visible(locator)
-            return element.get_attribute("value")
+            if element.tag_name.lower() in ["input", "textarea"]:
+                return element.get_attribute("value")
+            else:
+                return element.text
         except TimeoutException:
             assert False, f"Unable to get text value from: {locator}"
 
@@ -318,7 +324,7 @@ class BasePage:
         return self.driver.current_url
 
     def get_base_url(self):
-        current_url_1 = (self.get_current_url()).split('/')[0:5]
+        current_url_1 = (self.get_current_url()).split('/')[0:4]
         current_url_2 = '/'.join(current_url_1)
         return current_url_2
 
@@ -327,3 +333,13 @@ class BasePage:
                       name="Screenshot on pytest check fails",
                       attachment_type=allure.attachment_type.PNG)
 
+    def wait_for_loader_to_disappear(self, timeout=15):
+        try:
+            WebDriverWait(self.driver, timeout).until(
+                EC.invisibility_of_element_located(
+                    ("css selector", ".oxd-form-loader")
+                )
+            )
+        except TimeoutException:
+            # Sometimes loader flashes very fast – ignore safely
+            pass
