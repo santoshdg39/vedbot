@@ -3,11 +3,13 @@ import random
 import string
 import time
 
+
 from Config import navigate_urls
 from HelperMethods.test_data_generator_helper import DataGenerator
 from Pages.BasePage.base_page import BasePage
 from Pages.dashboard.dashboard_page import DashboardPage
 from Pages.login.login_page import LoginPage
+from TestData import messages
 
 
 class PimPage(BasePage):
@@ -83,3 +85,25 @@ class PimPage(BasePage):
         self.wait_for_element_and_refresh(self.pimPageLocators.employee_list)
         self.search_employee(employee_id, full_name)
         assert self.is_displayed(self.pimPageLocators.no_records_found), "Employee not deleted"
+
+    def import_data(self, file_path):
+        self.navigate_pim()
+        self.click_after_wait(self.pimPageLocators.configuration)
+        self.click_after_wait(self.pimPageLocators.data_import)
+        text_before_file_upload = self.get_text_value(self.pimPageLocators.no_file_selected).strip()
+        assert messages.no_file_selected_text in text_before_file_upload, \
+            f"Expected '{messages.no_file_selected_text}' but got {text_before_file_upload}"
+        self.log.info(f"[INFO] Uploading employee file from path: {file_path}")
+        self.upload_file(file_path)
+        uploaded_file_name = self.get_text_value(self.pimPageLocators.file_uploaded).strip()
+        assert messages.file_uploaded_text in uploaded_file_name, \
+            f"File upload failed. Text shown: {uploaded_file_name}"
+        self.click_after_wait(self.pimPageLocators.upload_csv_button)
+
+    def upload_file(self, file_path):
+        self.log.info(f"[UPLOAD] {file_path}")
+        file_input = self.find_element(self.pimPageLocators.file_input)
+        file_input.send_keys(file_path)
+
+
+

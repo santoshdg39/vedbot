@@ -1,0 +1,6 @@
+no_file_selected_text = "No file selected"
+file_uploaded_text = "importData.csv"
+import_detail_text = "Import Details"
+personal_details_text_on_listPage = "Personal Details"
+account_disabled_msg_text = "Account disabled"
+invalid_password_error_message_text = "Invalid credentials"
