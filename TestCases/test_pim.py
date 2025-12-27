@@ -65,7 +65,7 @@ class TestPim(BaseTest):
         self.log.info(f"Disabled status employee is trying to login {personal_details_text}")
         assert TestData.messages.account_disabled_msg_text in account_disabled_msg, "account is active"
 
-    # Verify employee data import using an Excel file and confirm the employee is successfully imported
+    # Verify employee data import successfully using an CSV file
     @pytest.mark.regression
     def test_004_import_employee(self, load_pages, prepare_employee_csv_data):
         self.log.info("TEST STARTED: Import employee using csv file")
