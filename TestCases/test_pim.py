@@ -9,9 +9,9 @@ from TestCases.basetest import BaseTest
 
 class TestPim(BaseTest):
 
-    # Verify adding an employee without login details and ensure the employee appears in the employee list.
+    # 001 Verify adding an employee without login details and ensure the employee appears in the employee list.
     @pytest.mark.sanity
-    def test_001_add_employee_without_login_details(self, load_pages):
+    def test_add_employee_without_login_details(self, load_pages):
         self.log.info("TEST STARTED: add_employee_without_login_details")
         self.loginPage.login(self.username, self.password)
         self.log.info("Logged in as Admin")
@@ -24,9 +24,9 @@ class TestPim(BaseTest):
         self.pimPage.search_employee(employee_id, full_name)
         self.pimPage.delete_employee(employee_id, full_name)
 
-    # Verify that an employee can be added with login details, has an enabled status, and can successfully log in.
+    # 002 Verify that an employee can be added with login details, has an enabled status, and can successfully log in.
     @pytest.mark.sanity
-    def test_002_add_employee_with_login_details(self, load_pages):
+    def test_add_employee_with_login_details(self, load_pages):
         self.log.info("TEST STARTED: add_employee_with_login_details")
         self.loginPage.login(self.username, self.password)
         self.log.info("Logged in as Admin")
@@ -45,9 +45,9 @@ class TestPim(BaseTest):
         expected_employee_display_name = " ".join([full_name_list[0], full_name_list[-1]])
         assert actual_employee_display_name == expected_employee_display_name, "Incorrect employee logged in"
 
-    # Verify that a disabled employee with login details cannot log in.
+    # 003 Verify that a disabled employee with login details cannot log in.
     @pytest.mark.sanity
-    def test_003_add_employee_with_login_details_status_disabled(self, load_pages):
+    def test_add_employee_with_login_details_status_disabled(self, load_pages):
         self.log.info("TEST STARTED: add_employee_with_login_details_status_disabled")
         self.loginPage.login(self.username, self.password)
         self.log.info("Logged in as Admin")
@@ -65,9 +65,9 @@ class TestPim(BaseTest):
         self.log.info(f"Disabled status employee is trying to login {personal_details_text}")
         assert TestData.messages.account_disabled_msg_text in account_disabled_msg, "account is active"
 
-    # Verify employee data import successfully using an CSV file
+    # 004 Verify employee data import successfully using an CSV file
     @pytest.mark.regression
-    def test_004_import_employee(self, load_pages, prepare_employee_csv_data):
+    def test_import_employee(self, load_pages, prepare_employee_csv_data):
         self.log.info("TEST STARTED: Import employee using csv file")
         self.loginPage.login(self.username, self.password)
         self.log.info("Logged in as Admin")

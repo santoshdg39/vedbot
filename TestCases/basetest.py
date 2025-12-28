@@ -53,8 +53,8 @@ class BaseTest:
         self.pimPageLocators = PimPageLocators()
 
         # Read credentials from the config file
-        self.username = ReadProp.get_config_data("site_config.ini", self.category, "username")
-        self.password = ReadProp.get_config_data("site_config.ini", self.category, "password")
+        self.username = ReadProp.get_config_data("site_config.ini", self.category, "username", decrypt=True)
+        self.password = ReadProp.get_config_data("site_config.ini", self.category, "password", decrypt=True)
 
 
 

@@ -1,20 +1,27 @@
 import configparser
 import os
-import time
 from Config import global_var
+from Config.crypto_helper import CryptoHelper
 
 
 class ReadProp:
 
     @staticmethod
-    def get_config_data(ini_file, section, key):
+    def get_config_data(ini_file, section, key, decrypt=False):
         config = configparser.ConfigParser()
         file_path = os.path.join(global_var.CONFIG_PATH, ini_file)
         read_success = config.read(file_path)
-        if read_success:
-            return config.get(section, key, fallback="not_found")
-        else:
-            print("Failed to configuration file")
+
+        if not read_success:
+            print("Failed to read configuration file")
+            return "not_found"
+
+        value = config.get(section, key, fallback="not_found")
+
+        if decrypt:
+            return CryptoHelper.decrypt(value)
+
+        return value
 
     @staticmethod
     def write_config_data(ini_file, section, changes):
