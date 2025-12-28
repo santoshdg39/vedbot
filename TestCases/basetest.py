@@ -1,7 +1,7 @@
 import pytest
 
 from HelperMethods.config_parser import ReadProp
-from HelperMethods.drivermanager import DriverManager
+from HelperMethods.driver_manager import DriverManager
 from Pages.dashboard.dashboard_page import DashboardPage
 from Pages.dashboard.dashboard_page_locators import DashBoardPageLocators
 from Pages.login.login_page import LoginPage
@@ -24,8 +24,8 @@ class BaseTest:
             self.category = "sanity"
 
         self.url = ReadProp.get_config_data("site_config.ini", self.category, "site_url")
-        self.log = rp_logger
 
+        self.log = rp_logger
         self.log.info("URL: " + self.url)
 
         self.driver = DriverManager.drivermanager(browser, headless)
@@ -53,8 +53,8 @@ class BaseTest:
         self.pimPageLocators = PimPageLocators()
 
         # Read credentials from the config file
-        self.username = ReadProp.get_config_data("site_config.ini", self.category, "username")
-        self.password = ReadProp.get_config_data("site_config.ini", self.category, "password")
+        self.username = ReadProp.get_config_data("site_config.ini", self.category, "username", decrypt=True)
+        self.password = ReadProp.get_config_data("site_config.ini", self.category, "password", decrypt=True)
 
 
 

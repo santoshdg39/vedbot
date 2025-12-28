@@ -2,7 +2,7 @@ from selenium.webdriver.common.by import By
 
 
 class PimPageLocators:
-    configuration = (By.XPATH, "//span[@class='oxd-topbar-body-nav-tab-item'']")
+    configuration = (By.XPATH, "//span[normalize-space()='Configuration']")
     add_employee = (By.XPATH, "//a[@href='#' and text()='Add Employee']")
     employee_list = (By.XPATH, "//a[@href='#' and text()='Employee List']")
     Reports = (By.XPATH, "//a[@href='#' and text()='Reports']")
@@ -19,10 +19,23 @@ class PimPageLocators:
     cancelButton = (By.XPATH, "//button[@type='button' and normalize-space()='Cancel']")
     status_enabled = (By.XPATH, "//input[@type='radio' and @value='1']")
     status_disabled = (By.XPATH, "//label[normalize-space()='Disabled']")
-    employee_name_listPage = (By.XPATH, "//h6[@class='oxd-text oxd-text--h6 --strong']")
+    personal_details_text_on_listPage = (By.XPATH, "//h6[normalize-space()='Personal Details']")
     employee_id_listPage = (By.XPATH, "//label[normalize-space()='Employee Id'] /ancestor::div[contains(@class,'oxd-input-group')]//input[contains(@class,'oxd-input')]")
     search_button = (By.XPATH, "//button[normalize-space()='Search']")
     select_employee_zero = (By.XPATH, "//input[@type='checkbox' and @value='0']/parent::label")
     delete_employee_button = (By.XPATH, "//button[@type='button' and @class='oxd-button oxd-button--medium oxd-button--label-danger orangehrm-horizontal-margin']")
     yes_deleted_button = (By.XPATH, "//button[@type='button' and @class='oxd-button oxd-button--medium oxd-button--label-danger orangehrm-button-margin']")
     no_records_found = (By.XPATH, "//span[normalize-space()='No Records Found']")
+    data_import = (By.XPATH, "//a[normalize-space()='Data Import']")
+    no_file_selected = (By.XPATH, "//div[normalize-space()='No file selected']")
+    browse = (By.XPATH, "//div[normalize-space()='Browse']")
+    file_input = (By.XPATH, "//input[@type='file']")
+    file_uploaded = (By.XPATH, "//div[normalize-space()='importData.csv']")
+    upload_csv_button =(By.XPATH, "//button[@type='submit']")
+    import_details = (By.XPATH, "//p[normalize-space()='Import Details']")
+    import_success_message = (By.XPATH, "//p[normalize-space()='1 Record Successfully Imported']")
+
+
+
+
+

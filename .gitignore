@@ -15,3 +15,5 @@ Report/
 Artifacts/
 
 .idea/
+.env
+generate_crypto_key.py

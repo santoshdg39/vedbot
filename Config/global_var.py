@@ -12,4 +12,5 @@ DATA_FILES_PATH = os.path.join(ROOT_DIR, f"TESTDATA")
 ALLURE_RESULTS_PATH = os.path.join(ROOT_DIR, f"Report{path_divider}allureReport")
 SCREENSHOT_PATH = os.path.join(ROOT_DIR, f"Artifacts{path_divider}Screenshots")
 LOGS_PATH = os.path.join(ROOT_DIR, f"Artifacts{path_divider}Logs")
-NEW_USER_EXCEL_PATH = os.path.join(ROOT_DIR, f"TESTDATA{path_divider}new_user.xlsx")
+IMPORT_EMPLOYEE_CSV_PATH = os.path.join(ROOT_DIR, f"TESTDATA{path_divider}importData.csv")
+USERS_SHEET_NAME = "Employees"

@@ -4,6 +4,7 @@ from datetime import datetime
 import allure
 from selenium.common import NoSuchElementException, TimeoutException, ElementNotInteractableException
 from selenium.webdriver import Keys, ActionChains
+from selenium.webdriver.common.by import By
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -343,3 +344,7 @@ class BasePage:
         except TimeoutException:
             # Sometimes loader flashes very fast – ignore safely
             pass
+
+    @staticmethod
+    def xpath_by_text(tag, text):
+        return (By.XPATH, f"//{tag}[normalize-space()='{text}']")

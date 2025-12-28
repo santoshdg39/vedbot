@@ -9,6 +9,8 @@ import logging as py_logging
 from allure_commons.types import AttachmentType
 
 from Config import global_var
+from HelperMethods.csv_helper import CSVHelper
+from HelperMethods.test_data_generator_helper import DataGenerator
 
 if platform.system() == "Windows":
     path_divider = "\\"
@@ -18,8 +20,18 @@ else:
 
 @pytest.fixture(scope="session")
 def rp_logger():
-    logger = py_logging.getLogger(__name__)
-    py_logging.basicConfig(level=py_logging.INFO, format='%(message)s')
+    logger = py_logging.getLogger("Ved_Bot")
+    logger.setLevel(py_logging.INFO)
+
+    if not logger.handlers:
+        console_handler = py_logging.StreamHandler()
+        formatter = py_logging.Formatter(
+            "%(asctime)s - %(levelname)s - %(message)s"
+        )
+        console_handler.setFormatter(formatter)
+        logger.addHandler(console_handler)
+
+    logger.propagate = False
     return logger
 
 
@@ -73,3 +85,22 @@ def pytest_runtest_makereport(item):
             attachment_type=AttachmentType.PNG
         )
 
+
+@pytest.fixture(scope="function")
+def prepare_employee_csv_data():
+    # Create / clear Excel file
+    CSVHelper.clear_and_create(
+        global_var.IMPORT_EMPLOYEE_CSV_PATH
+    )
+
+    # Generate test employee data
+    employee_data = [DataGenerator.create_user()]
+
+    # Add data rows to Excel
+    CSVHelper.add_rows(
+        global_var.IMPORT_EMPLOYEE_CSV_PATH,
+        employee_data
+    )
+
+    # Pass the file path to the test
+    yield global_var.IMPORT_EMPLOYEE_CSV_PATH

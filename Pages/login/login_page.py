@@ -27,9 +27,6 @@ class LoginPage(BasePage):
             self.log.error("Login action failed", exc_info=True)
             raise
 
-    def is_login_error_displayed(self):
-        return self.is_displayed(self.loginPageLocators.ERROR_MESSAGE)
-
     def logout_employee(self):
         self.click_after_wait(self.loginPageLocators.user_profile_dropdown)
         self.click_after_wait(self.loginPageLocators.logout_button)
