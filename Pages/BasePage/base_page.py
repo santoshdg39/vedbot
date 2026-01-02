@@ -325,7 +325,7 @@ class BasePage:
         return self.driver.current_url
 
     def get_base_url(self):
-        current_url_1 = (self.get_current_url()).split('/')[0:4]
+        current_url_1 = (self.get_current_url()).split('/')[0:5]
         current_url_2 = '/'.join(current_url_1)
         return current_url_2
 
