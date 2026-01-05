@@ -10,7 +10,8 @@ class DashboardPage(BasePage):
         self.category = category
 
     def is_dashboard_displayed(self):
-        return self.is_displayed(self.dashboardPageLocators.dashboard_page_link)
+        dashboard_page_heading = self.get_text_value(self.dashboardPageLocators.dashboard_page_heading)
+        return dashboard_page_heading
 
 
 

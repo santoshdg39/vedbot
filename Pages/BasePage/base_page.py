@@ -9,6 +9,7 @@ from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+from Pages.admin.admin_page_locators import AdminPageLocators
 from Pages.dashboard.dashboard_page_locators import DashBoardPageLocators
 from Pages.login.login_page_locators import LoginPageLocators
 from Pages.pim.pim_page_locators import PimPageLocators
@@ -22,6 +23,7 @@ class BasePage:
         self.loginPageLocators = LoginPageLocators
         self.dashboardPageLocators = DashBoardPageLocators
         self.pimPageLocators = PimPageLocators
+        self.adminPageLocators = AdminPageLocators
 
     def open_page(self, url):
         self.driver.get(url)
@@ -348,3 +350,85 @@ class BasePage:
     @staticmethod
     def xpath_by_text(tag, text):
         return (By.XPATH, f"//{tag}[normalize-space()='{text}']")
+
+    def select_dropdown_by_keyboard(self, locator, down_count=1, delay=0.3):
+        """
+        Select dropdown option using keyboard (Arrow Down + Enter)
+
+        :param locator: Locator tuple of dropdown element
+        :param down_count: Number of ARROW_DOWN presses
+                           1 = first option
+                           2 = second option
+        :param delay: Small delay between key presses
+        """
+        dropdown = self.find_element(locator)
+        dropdown.click()
+
+        for _ in range(down_count):
+            dropdown.send_keys(Keys.ARROW_DOWN)
+            time.sleep(delay)
+
+        dropdown.send_keys(Keys.ENTER)
+
+    def type_and_select(self, locator, text, arrow_count=1):
+        """
+        Types text into an element, then navigates options with Arrow Down and selects with Enter.
+
+        :param locator: tuple, (By.<METHOD>, "locator_value")
+        :param text: str, text to type first
+        :param arrow_count: int, number of Arrow Down presses before Enter
+        """
+        try:
+            element = self.driver.find_element(*locator)
+            element.click()  # Focus on the element
+            element.send_keys(text)  # Type text
+            time.sleep(5)
+            for _ in range(arrow_count):
+                element.send_keys(Keys.ARROW_DOWN)
+            element.send_keys(Keys.ENTER)
+        except NoSuchElementException:
+            assert False, f"Element not found: {locator}"
+
+    def clear_field(self, locator):
+        """
+        Clears input field using keyboard actions (Ctrl+A + Delete)
+        """
+        try:
+            element = self.driver.find_element(*locator)
+            element.click()
+            element.send_keys(Keys.CONTROL + "a")
+            element.send_keys(Keys.DELETE)
+        except NoSuchElementException:
+            assert False, f"Element not found: {locator}"
+
+    def send_keys_after_wait_ce(self, locator, text):
+        try:
+            element = self.wait.until(EC.visibility_of_element_located(locator))
+            element.click()
+            element.send_keys(Keys.CONTROL + "a")
+            element.send_keys(Keys.DELETE)
+            element.send_keys(text)
+        except TimeoutException:
+            assert False, f"Element not visible: {locator}"
+
+    def wait_for_visibility_by_xpath(self, xpath):
+        try:
+            return self.wait.until(
+                EC.visibility_of_element_located((By.XPATH, xpath))
+            )
+        except TimeoutException:
+            assert False, f"Element not visible for xpath: {xpath}"
+
+    def find_child_elements_by_xpath(self, parent_element, child_xpath):
+        """
+        Finds multiple child elements inside a given parent element.
+
+        parent_element : WebElement
+        child_xpath     : relative XPath string (e.g., ".//div[@role='cell']")
+        """
+        try:
+            # Return all child elements under the parent
+            return parent_element.find_elements(By.XPATH, child_xpath)
+        except NoSuchElementException:
+            assert False, f"Child elements not found for xpath: {child_xpath}"
+

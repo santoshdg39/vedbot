@@ -81,7 +81,22 @@ Screenshot capture on test failure
 Allure integration for rich reporting
 Clean and scalable project structure
 
+Local Details:
+Store URL:http://localhost/orangehrm-5.8/web/index.php/auth/login
+Username: Admin
+Password: Santosh24011992#
+Database: http://localhost/dashboard/
+
+Database Credentials:
+host = localhost
+port = 3306
+user = root
+password =
+database = orangehrm
+
 
 Santosh Gadekar
 Senior QA Engineer
 GitHub: [https://github.com/santoshdg39/vedbot](https://github.com/santoshdg39/vedbot)
+
+

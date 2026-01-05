@@ -2,6 +2,8 @@ import pytest
 
 from HelperMethods.config_parser import ReadProp
 from HelperMethods.driver_manager import DriverManager
+from Pages.admin.admin_page import AdminPage
+from Pages.admin.admin_page_locators import AdminPageLocators
 from Pages.dashboard.dashboard_page import DashboardPage
 from Pages.dashboard.dashboard_page_locators import DashBoardPageLocators
 from Pages.login.login_page import LoginPage
@@ -11,17 +13,22 @@ from Pages.pim.pim_page_locators import PimPageLocators
 
 """ Initialize driver, browser and redirect to URL and after completing test close the driver"""
 
-
 class BaseTest:
 
     @pytest.fixture(autouse=True)
     def init_driver(self, request, rp_logger):
         browser = request.config.getoption("--browser")
-        headless = False
+        headless = request.config.getoption("--headless").lower() == "true"
 
         self.category = request.config.getoption("-m")
-        if self.category == "":
-            self.category = "sanity"
+
+        # Detect marker from the test
+        if request.node.get_closest_marker("local"):
+            self.category = "local"
+        elif request.node.get_closest_marker("regression"):
+            self.category = "regression"
+        else:
+            self.category = "sanity"  # default
 
         self.url = ReadProp.get_config_data("site_config.ini", self.category, "site_url")
 
@@ -33,7 +40,7 @@ class BaseTest:
         # CRITICAL LINE (for screenshot hook)
         request.cls.driver = self.driver
 
-        self.driver.maximize_window()
+
         self.driver.get(self.url)
 
         yield self.driver
@@ -47,10 +54,12 @@ class BaseTest:
         self.loginPage = LoginPage(self.driver, self.log, self.category)
         self.dashboardPage = DashboardPage(self.driver, self.log, self.category)
         self.pimPage = PimPage(self.driver, self.log, self.category)
+        self.adminPage = AdminPage(self.driver, self.log, self.category)
         # Initialize the locators as an instance
         self.loginpagelocators = LoginPageLocators()
         self.dashboardPageLocators = DashBoardPageLocators()
         self.pimPageLocators = PimPageLocators()
+        self.adminPageLocators = AdminPageLocators()
 
         # Read credentials from the config file
         self.username = ReadProp.get_config_data("site_config.ini", self.category, "username", decrypt=True)

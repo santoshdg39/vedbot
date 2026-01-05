@@ -1,6 +1,8 @@
 import random
 import string
 from datetime import time
+import random
+from datetime import datetime
 
 
 class DataGenerator:
@@ -40,3 +42,25 @@ class DataGenerator:
             "other_email": ""
         }
 
+    @staticmethod
+    def generate_user_credentials(base_name="Admin", name="Santosh"):
+        """
+        Generates a unique username and password.
+
+        Username: base_name + name + date + random number (optional)
+        Password: name + date + special character #
+
+        Example:
+            Username: AdminSantosh03012026
+            Password: Santosh03012026#
+        """
+        # Current date in DDMMYYYY format
+        date_str = datetime.now().strftime("%d%m%Y")
+
+        # Optional random 2-digit number to ensure uniqueness if needed
+        rand_num = random.randint(10, 99)
+
+        username = f"{base_name}{name}{date_str}{rand_num}"
+        password = f"{name}{date_str}#"
+
+        return username, password

@@ -32,13 +32,13 @@ class DriverManager:
             options = DriverManager.set_common_options(options, headless)
             # Automatically downloads correct ChromeDriver
             driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
-        #
-        # elif browser == 'firefox':
-        #     options = FirefoxOptions()
-        #     if headless:
-        #         options.add_argument("--headless")
-        #     # Automatically downloads correct GeckoDriver
-        #     driver = webdriver.Firefox(service=FirefoxService(GeckoDriverManager().install()), options=options)
+
+        elif browser == 'firefox':
+            options = FirefoxOptions()
+            if headless:
+                options.add_argument("--headless")
+            # Automatically downloads correct GeckoDriver
+            driver = webdriver.Firefox(service=FirefoxService(GeckoDriverManager().install()), options=options)
 
         else:
             raise Exception(f"Incorrect Browser: {browser}. Supported browsers: Chrome, Firefox")
