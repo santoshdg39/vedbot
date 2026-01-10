@@ -23,7 +23,7 @@ class PimPageLocators:
     employee_id_listPage = (By.XPATH, "//label[normalize-space()='Employee Id'] /ancestor::div[contains(@class,'oxd-input-group')]//input[contains(@class,'oxd-input')]")
     search_button = (By.XPATH, "//button[normalize-space()='Search']")
     select_employee_zero = (By.XPATH, "//input[@type='checkbox' and @value='0']/parent::label")
-    delete_employee_button = (By.XPATH, "//button[@type='button' and @class='oxd-button oxd-button--medium oxd-button--label-danger orangehrm-horizontal-margin']")
+    delete_employee_button = (By.XPATH, "//div[@role='row'][1]//button[.//i[contains(@class,'bi-trash')]]")
     yes_deleted_button = (By.XPATH, "//button[@type='button' and @class='oxd-button oxd-button--medium oxd-button--label-danger orangehrm-button-margin']")
     no_records_found = (By.XPATH, "//span[normalize-space()='No Records Found']")
     data_import = (By.XPATH, "//a[normalize-space()='Data Import']")
@@ -34,6 +34,7 @@ class PimPageLocators:
     upload_csv_button =(By.XPATH, "//button[@type='submit']")
     import_details = (By.XPATH, "//p[normalize-space()='Import Details']")
     import_success_message = (By.XPATH, "//p[normalize-space()='1 Record Successfully Imported']")
+    employee_information = (By.XPATH, "//h5[normalize-space()='Employee Information']")
 
 
 

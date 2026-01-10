@@ -3,8 +3,8 @@ import random
 import string
 import time
 
-
-from Config import navigate_urls
+from Config import navigate_urls, global_var
+from HelperMethods.csv_helper import CSVHelper
 from HelperMethods.test_data_generator_helper import DataGenerator
 from Pages.BasePage.base_page import BasePage
 from Pages.dashboard.dashboard_page import DashboardPage
@@ -33,7 +33,7 @@ class PimPage(BasePage):
         # password = "Test@" + ''.join(
         #     random.choices(string.ascii_letters + string.digits, k=6)
         # )
-        password = "Santosh24#"
+        password = "Santosh24011992#"
         time.sleep(10)
         self.send_keys_after_wait(self.pimPageLocators.userName, username)
         self.send_keys_after_wait(self.pimPageLocators.passWord, password)
@@ -83,6 +83,7 @@ class PimPage(BasePage):
         self.click_after_wait(self.pimPageLocators.delete_employee_button)
         self.click_after_wait(self.pimPageLocators.yes_deleted_button)
         self.wait_for_element_and_refresh(self.pimPageLocators.employee_list)
+        self.wait_for_element_and_refresh(self.pimPageLocators.employee_information)
         self.search_employee(employee_id, full_name)
         assert self.is_displayed(self.pimPageLocators.no_records_found), "Employee not deleted"
 
@@ -105,5 +106,24 @@ class PimPage(BasePage):
         file_input = self.find_element(self.pimPageLocators.file_input)
         file_input.send_keys(file_path)
 
+    def get_employees_from_csv(self):
+        """
+        Reads employees from the CSV file and returns a list of dicts
+        containing first_name, last_name, and employee_id
+        """
+        rows = CSVHelper.read_rows(global_var.IMPORT_EMPLOYEE_CSV_PATH)
+        if not rows:
+            self.log.warning("CSV file is empty")
+            return None, None, None, None
 
+        first_row = rows[0]  # Take the first employee
+        first_name = first_row.get("first_name", "")
+        middle_name = first_row.get("middle_name", "")
+        last_name = first_row.get("last_name", "")
+        employee_id = first_row.get("employee_id", "")
+
+        full_name = " ".join(name for name in [first_name, middle_name, last_name] if name)
+
+        self.log.info(f"Employee: {full_name} ({employee_id})")
+        return employee_id, full_name
 
