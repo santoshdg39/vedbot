@@ -31,16 +31,12 @@ class BasePage:
     def find_element(self, locator):
         try:
             return self.wait.until(EC.presence_of_element_located(locator))
-        except NoSuchElementException:
-            assert False, f"Element not found: {locator}"
         except TimeoutException:
             assert False, f"Timeout waiting for element to be visible: {locator}"
 
     def find_elements(self, locator):
         try:
-            return self.wait.until(EC.presence_of_element_located(locator))
-        except NoSuchElementException:
-            assert False, f"Element not found: {locator}"
+            return self.wait.until(EC.presence_of_all_elements_located(locator))
         except TimeoutException:
             assert False, f"Timeout waiting for element to be visible: {locator}"
 
