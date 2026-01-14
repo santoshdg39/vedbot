@@ -72,6 +72,7 @@ class BasePage:
         try:
             time.sleep(0.5)
             time.sleep(0.5)
+            print("Hello")
             self.driver.execute_script("arguments[0].setAttribute('style', arguments[1]);", element, "")
         except Exception as e:
             print(str(e))
