@@ -2,7 +2,8 @@ import time
 from datetime import datetime
 
 import allure
-from selenium.common import NoSuchElementException, TimeoutException, ElementNotInteractableException
+from selenium.common import NoSuchElementException, TimeoutException, ElementNotInteractableException, \
+    StaleElementReferenceException, UnexpectedTagNameException
 from selenium.webdriver import Keys, ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.select import Select
@@ -30,53 +31,85 @@ class BasePage:
 
     def find_element(self, locator):
         try:
-            return self.wait.until(EC.presence_of_element_located(locator))
-        except TimeoutException:
-            assert False, f"Timeout waiting for element to be visible: {locator}"
+            return self.wait.until(EC.visibility_of_element_located(locator))
+        except TimeoutException as e:
+            raise  TimeoutException (f"Timeout waiting for element to be visible: {locator}") from e
 
     def find_elements(self, locator):
         try:
-            return self.wait.until(EC.presence_of_all_elements_located(locator))
-        except TimeoutException:
-            assert False, f"Timeout waiting for element to be visible: {locator}"
+            return self.wait.until(EC.visibility_of_all_elements_located(locator))
+        except TimeoutException as e:
+            raise TimeoutException(f"Timeout waiting for elements to be visible: {locator}") from e
 
+    # Counting elements (visibility not required) Example: Number of records, Number of notifications, Pagination count
     def find_multiple_elements(self, locator):
         try:
-            time.sleep(2)
             return self.wait.until(EC.presence_of_all_elements_located(locator))
-        except NoSuchElementException:
-            assert False, f"Element not found: {locator}"
+        except TimeoutException as e:
+            raise TimeoutException (f"Element not present in DOM: {locator}") from e
+
+    # Waits until the element is visible and returns the WebElement.
+    # Raises TimeoutException if the element is not visible within the wait time.
+    # is_displayed() then returns True or False based on the element's visibility.
 
     def is_displayed(self, locator):
-        try:
-            return self.find_element(locator).is_displayed()
-        except NoSuchElementException:
-            assert False, f"Element not found: {locator}"
+        return self.find_element(locator).is_displayed()
 
     def is_selected(self, locator):
-        try:
-            return self.find_element(locator).is_selected()
-        except NoSuchElementException:
-            assert False, f"Element not found: {locator}"
+        return self.find_element(locator).is_selected()
+
+    def is_enabled(self, locator):
+        return self.find_element(locator).is_enabled()
+
+    def get_text(self, locator):
+        return self.find_element(locator).text.strip()
 
     def get_count_elements(self, locator):
-        try:
-            return len(self.find_multiple_elements(locator))
-        except NoSuchElementException:
-            assert False, f"Element not found: {locator}"
+        return len(self.find_multiple_elements(locator))
 
-    def highlight_element(self, locator):
+    def js_click(self, locator):
         element = self.find_element(locator)
+        self.driver.execute_script("arguments[0].click();", element)
+
+    def scroll_to_element(self, locator):
+        element = self.find_element(locator)
+        self.driver.execute_script("arguments[0].scrollIntoView({block:'center'});", element)
+
+    def scroll_to_element_and_click(self, locator):
+        self.scroll_to_element(locator)
+        self.click(locator)
+
+    def page_scroll(self):
+        SCROLL_PAUSE_TIME = 2
+        # get scroll height
+        page_height = self.driver.execute_script("return document.body.scrollHeight")
+        while True:
+            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            time.sleep(SCROLL_PAUSE_TIME)
+            new_height = self.driver.execute_script("return document.body.scrollHeight")
+            if new_height == page_height:
+                break
+            page_height = new_height
+
+    # Use when: send_keys() doesn’t work, React/Angular input issues
+    def js_send_keys(self, locator, text):
+        element = self.find_element(locator)
+        self.driver.execute_script("arguments[0].value=arguments[1];", element, text)
+
+    # Use when: .text returns empty, Hidden or dynamic text
+    def js_get_text(self, locator):
+        element = self.find_element(locator)
+        return self.driver.execute_script("return arguments[0].innerText;", element)
+
+    def highlight_element(self, locator, duration=0.5):
+        element = self.find_element(locator)
+        original_style = element.get_attribute("style")
         self.driver.execute_script("arguments[0].setAttribute('style',arguments[1]);", element,
                                    "background: yellow; border: 2px solid red;")
-        try:
-            time.sleep(0.5)
-            time.sleep(0.5)
-            print("Hello")
-            self.driver.execute_script("arguments[0].setAttribute('style', arguments[1]);", element, "")
-        except Exception as e:
-            print(str(e))
+        time.sleep(duration)
+        self.driver.execute_script("arguments[0].setAttribute('style', arguments[1]);", element, original_style)
 
+    # Using all three ensures the element exists, is visible, and is interactable before performing actions.
     def click(self, by_locator: object) -> object:
         try:
             self.wait.until(EC.presence_of_element_located(by_locator))
@@ -91,10 +124,22 @@ class BasePage:
         today_date = datetime.now()
         return today_date.strftime("%d%b%y%H%M")
 
+    # Identify the loader element on the page (here using CSS selector after manual inspection).
+    # If the loader disappears immediately, a TimeoutException may occur, which is safely ignored.
+    def wait_for_loader_to_disappear(self, timeout=15):
+        try:
+            WebDriverWait(self.driver, timeout).until(
+                EC.invisibility_of_element_located(
+                    (By.CSS_SELECTOR, ".oxd-overlay.oxd-overlay--flex-centered")
+                )
+            )
+        except TimeoutException:
+            # Sometimes loader flashes very fast – ignore safely
+            pass
+
     def click_after_wait(self, by_locator, timeout=15):
         self.wait_for_loader_to_disappear(timeout=timeout)
         try:
-            self.wait.until(EC.visibility_of_element_located(by_locator))
             element = self.wait.until(EC.element_to_be_clickable(by_locator))
             element.click()
         except TimeoutException:
@@ -104,7 +149,7 @@ class BasePage:
         try:
             self.highlight_element(locator)
             self.find_element(locator).send_keys(text)
-        except NoSuchElementException:
+        except TimeoutException:
             assert False, f"Element not found: {locator}"
 
     def send_keys_after_wait(self, locator, text):
@@ -146,8 +191,14 @@ class BasePage:
             assert False, f"Element not intractable: {locator}"
 
     def hit_enter(self, locator):
-        self.find_element(*locator).send_keys(Keys.ENTER)
+        try:
+            self.find_element(locator).send_keys(Keys.ENTER)
+        except (TimeoutException, StaleElementReferenceException, ElementNotInteractableException):
+            assert False, f"Unable to hit ENTER on element: {locator}"
 
+    # waits until the element is present, visible, and enabled,
+    # then returns it as a WebElement so it can be clicked safely.
+    # Use when you want to click a button, link, or checkbox.
     def wait_for_element_clickable(self, locator):
         try:
             element = self.wait.until(EC.element_to_be_clickable(locator))
@@ -155,6 +206,7 @@ class BasePage:
         except TimeoutException:
             assert False, f"Element not clickable: {locator}"
 
+    # Waits until an element exists in the DOM, visibility not required. Returns: WebElement
     def wait_for_element_visible(self, locator):
         try:
             element = self.wait.until(EC.presence_of_element_located(locator))
@@ -162,6 +214,8 @@ class BasePage:
         except TimeoutException:
             assert False, f"Element not visible: {locator}"
 
+    # Wait for loading spinners to disappear before continuing.
+    # Example: Page loader or spinner while fetching search results. It returns True/Timeout.
     def wait_for_element_invisible(self, locator):
         try:
             self.wait.until(EC.invisibility_of_element(locator))
@@ -178,6 +232,9 @@ class BasePage:
             except TimeoutException:
                 self.driver.refresh()
                 retries += 1
+        raise TimeoutException(
+            f"Element not visible after {max_retries} refresh attempts: {locator}"
+        )
 
     def get_text_value(self, locator):
         try:
@@ -195,57 +252,43 @@ class BasePage:
         except Exception as e:
             assert False, f"Unable to get page title. Error: {e}"
 
-    def scroll_to_element(self, locator):
-        try:
-            element = self.find_element(locator)
-            self.driver.execute_script("arguments[0].scrollIntoView(true);", element)
-        except NoSuchElementException:
-            assert False, f"Element not found: {locator}"
-
-    def scroll_to_element_and_click(self, locator):
-        try:
-            element = self.driver.find_element(*locator)
-            self.driver.execute_script("arguments[0].scrollIntoView()", element)
-            element.click()
-        except NoSuchElementException:
-            assert False, f"Element not found: {locator}"
-
-    def page_scroll(self):
-        SCROLL_PAUSE_TIME = 2
-        # get scroll height
-        page_height = self.driver.execute_script("return document.body.scrollHeight")
-        while True:
-            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            time.sleep(SCROLL_PAUSE_TIME)
-            new_height = self.driver.execute_script("return document.body.scrollHeight")
-            if new_height == page_height:
-                break
-            page_height = new_height
-
     def action_move_to_element_click(self, locator):
         try:
             action = ActionChains(self.driver)
             element = self.find_element(locator)
             action.move_to_element(element).click().perform()
-        except NoSuchElementException:
-            assert False, f"Element not found: {locator}"
+        except (TimeoutException, StaleElementReferenceException, ElementNotInteractableException):
+            assert False, f"Unable to move to and click element: {locator}"
 
+
+    """
+    Finds the element (with explicit wait)
+    Moves the mouse cursor to that element
+    Does NOT click
+    Leaves the cursor hovering over the element
+    """
     def action_move_to_element(self, locator):
         try:
             action = ActionChains(self.driver)
             element = self.find_element(locator)
             action.move_to_element(element).perform()
-        except NoSuchElementException:
-            assert False, f"Element not found: {locator}"
+        except (TimeoutException, StaleElementReferenceException, ElementNotInteractableException):
+            assert False, f"Unable to move to and click element: {locator}"
 
-    def action_drag_drop_element(self, locator):
+    def action_drag_drop_element(self, source_locator, target_locator):
         try:
             action = ActionChains(self.driver)
-            element = self.find_element(locator)
-            action.drag_and_drop(element).perform()
-        except NoSuchElementException:
-            assert False, f"Element not found: {locator}"
+            source = self.find_element(source_locator)
+            target = self.find_element(target_locator)
+            action.drag_and_drop(source, target).perform()
+        except (TimeoutException, StaleElementReferenceException, ElementNotInteractableException):
+            assert False, f"Unable to drag element {source_locator} to {target_locator}"
 
+    """
+    Checks immediately if an element exists in the DOM
+    Returns: True → element is present and False → element is NOT present
+    No wait, No visibility check
+    """
     def is_element_present(self, locator):
         try:
             self.driver.find_element(*locator)
@@ -253,73 +296,73 @@ class BasePage:
             return False
         return True
 
+    # Select is a built-in Selenium class used to handle HTML <select> dropdown elements.
+    # Use Select only if the HTML tag is <select>. It works with dropdowns that contain <option> tags.
     def select_dropdown_list(self, locator, select_by, data):
-        dropdown = Select(self.driver.find_element(locator))
-        if select_by == "index":
-            dropdown.select_by_index(int(data))
-        elif select_by == "value":
-            dropdown.select_by_value(str(data))
-        elif select_by == "text":
-            dropdown.select_by_visible_text(str(data))
-        else:
-            raise Exception("Invalid select_by type. Use: index / value / text")
-        return dropdown
+        try:
+            element = self.find_element(locator)   # explicit wait
+            dropdown = Select(element)
+            if select_by == "index":
+                dropdown.select_by_index(int(data))
+            elif select_by == "value":
+                dropdown.select_by_value(str(data))
+            elif select_by == "text":
+                dropdown.select_by_visible_text(str(data))
+            else:
+                raise ValueError("Invalid select_by type. User: index / value / text")
+            return dropdown
+        except (TimeoutException, StaleElementReferenceException, ElementNotInteractableException) as e:
+            assert False, f"Dropdown selection failed for : {locator} : {e}"
 
+
+    # This method gives the currently selected <option>
+    # If it’s a single-select dropdown → returns the selected option
+    # If it’s a multi-select dropdown → returns the first selected option
     def get_select_selected_value(self, locator, text_type="value"):
         try:
-            dropdown = Select(self.driver.find_element(*locator))
+            element = self.find_element(locator)
+            dropdown = Select(element)
             if text_type == "value":
-                selected_value = dropdown.first_selected_option.get_attribute("value")
+                return dropdown.first_selected_option.get_attribute("value")
+            elif text_type == "text":
+                return dropdown.first_selected_option.text
             else:
-                selected_value = dropdown.first_selected_option.text
-            return selected_value
-        except NoSuchElementException:
-            assert False, f"Dropdown not found: {locator}"
+                raise ValueError("text_type must be either 'value' or 'text'")
+        except (TimeoutException, StaleElementReferenceException, ElementNotInteractableException) as e:
+            assert False, f"Failed to get selected dropdown value for : {locator}  : {e}"
 
-    def get_select_selected_text(self, locator):
-        try:
-            dropdown = Select(self.driver.find_element(*locator))
-            selected_value_text = dropdown.first_selected_option.text
-            return selected_value_text
-        except NoSuchElementException:
-            assert False, f"Element not found {locator}"
-
+    # Search for an option in a dropdown and select it only if it exists
     def search_select_by_visible_text(self, locator, search_string):
         try:
-            dropdown = Select(self.driver.find_element(*locator))
+            element = self.find_element(locator)
+            dropdown = Select(element)
             desired_option = search_string
-            option_available = False
             for option in dropdown.options:
-                if option == desired_option:
-                    option_available = True
-                    break
-            if option_available:
-                dropdown.select_by_visible_text(desired_option)
-        except NoSuchElementException:
-            assert False, f"Option not found: {locator}"
-
-    def get_multi_selected_values(self, locator, text_type):
-        try:
-            dropdown = Select(self.driver.find_element(*locator))
-            if text_type == "text":
-                return [option.text for option in dropdown.all_selected_options]
-            else:
-                return [option.get_attribute("value") for option in dropdown.all_selected_options]
-        except NoSuchElementException:
+                if option.text == desired_option:
+                    dropdown.select_by_visible_text(desired_option)
+                    return
+            assert False, f"Search string {search_string} not found in dropdown list: {locator}"
+        except TimeoutException:
             assert False, f"Dropdown not found: {locator}"
 
-    def move_to_iframe(self, locator):
+    """
+    Returns all currently selected values (text or value attribute) from a multi-select dropdown
+    for validation or assertions in tests.
+    """
+    def get_multi_selected_values(self, locator, text_type):
         try:
-            self.wait.until(EC.frame_to_be_available_and_switch_to_it(locator))
-        except TimeoutException:
-            assert False, f"The element not found: {locator}"
-
-    def count_of_elements(self, locator):
-        try:
-            elements = self.driver.find_elements(*locator)
-            return len(elements)
-        except NoSuchElementException:
-            assert False, f"Elements not found: {locator}"
+            element = self.find_element(locator)
+            dropdown = Select(element)
+            if not dropdown.is_multiple:
+                assert False, f"Dropdown is not multi-select : {locator}"
+            if text_type == "text":
+                return [option.text for option in dropdown.all_selected_options]
+            elif text_type == "value":
+                return [option.get_attribute("value") for option in dropdown.all_selected_options]
+            else:
+                raise ValueError("text_type must be either 'value' or 'text'")
+        except (TimeoutException, UnexpectedTagNameException) as e:
+            assert False, f"Failed to get selected values from dropdown : {locator} : {e}"
 
     def get_current_url(self):
         return self.driver.current_url
@@ -328,26 +371,6 @@ class BasePage:
         current_url_1 = (self.get_current_url()).split('/')[0:5]
         current_url_2 = '/'.join(current_url_1)
         return current_url_2
-
-    def attach_screenshot_to_allure_report(self):
-        allure.attach(self.driver.get_screenshot_as_png(),
-                      name="Screenshot on pytest check fails",
-                      attachment_type=allure.attachment_type.PNG)
-
-    def wait_for_loader_to_disappear(self, timeout=15):
-        try:
-            WebDriverWait(self.driver, timeout).until(
-                EC.invisibility_of_element_located(
-                    ("css selector", ".oxd-form-loader")
-                )
-            )
-        except TimeoutException:
-            # Sometimes loader flashes very fast – ignore safely
-            pass
-
-    @staticmethod
-    def xpath_by_text(tag, text):
-        return (By.XPATH, f"//{tag}[normalize-space()='{text}']")
 
     def select_dropdown_by_keyboard(self, locator, down_count=1, delay=0.3):
         """
@@ -387,28 +410,6 @@ class BasePage:
         except NoSuchElementException:
             assert False, f"Element not found: {locator}"
 
-    def clear_field(self, locator):
-        """
-        Clears input field using keyboard actions (Ctrl+A + Delete)
-        """
-        try:
-            element = self.driver.find_element(*locator)
-            element.click()
-            element.send_keys(Keys.CONTROL + "a")
-            element.send_keys(Keys.DELETE)
-        except NoSuchElementException:
-            assert False, f"Element not found: {locator}"
-
-    def send_keys_after_wait_ce(self, locator, text):
-        try:
-            element = self.wait.until(EC.visibility_of_element_located(locator))
-            element.click()
-            element.send_keys(Keys.CONTROL + "a")
-            element.send_keys(Keys.DELETE)
-            element.send_keys(text)
-        except TimeoutException:
-            assert False, f"Element not visible: {locator}"
-
     def wait_for_visibility_by_xpath(self, xpath):
         try:
             return self.wait.until(
@@ -427,6 +428,5 @@ class BasePage:
         try:
             # Return all child elements under the parent
             return parent_element.find_elements(By.XPATH, child_xpath)
-        except NoSuchElementException:
+        except TimeoutException:
             assert False, f"Child elements not found for xpath: {child_xpath}"
-
