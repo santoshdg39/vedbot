@@ -1,26 +1,37 @@
-# VedBot – Test Automation Framework
-# http://localhost:9090/
-usename- santoshdg39
-password- Santosh24#
-## Project Overview
+VedBot – Test Automation Framework
 
-**VedBot** is a Selenium–PyTest based test automation framework designed to automate web application testing using industry-standard best practices. The framework follows the **Page Object Model (POM)** design pattern to ensure scalability, maintainability, and reusability of test code.
+http://localhost:9090/
 
-This project demonstrates real-world automation skills such as structured test design, reusable utilities, reporting, and failure analysis.
+Username: santoshdg39
+Password: Santosh24#
+
+Project Overview
+
+VedBot is a Selenium–PyTest based test automation framework designed to automate web application testing using industry-standard best practices. The framework follows the Page Object Model (POM) design pattern to ensure scalability, maintainability, and reusability of test code.
+
+In addition to PyTest, the framework supports BDD (Behavior-Driven Development) using Behave, allowing tests to be written in business-readable Gherkin syntax and linked to Python step definitions for automation.
+
+This project demonstrates real-world automation skills such as structured test design, reusable utilities, reporting, failure analysis, and multi-environment execution.
 
 Test Website: https://opensource-demo.orangehrmlive.com/
 
-##  Tech Stack
-Programming Language:Python
-Automation Tool:Selenium WebDriver
-Test Framework:PyTest
+Tech Stack
+
+Programming Language: Python
+
+Automation Tool: Selenium WebDriver
+
+Test Framework: PyTest / Behave (BDD)
+
 Design Pattern: Page Object Model (POM)
-Reporting:Allure Reports
-Build / Execution: PyTest CLI
+
+Reporting: Allure Reports
+
+Build / Execution: PyTest CLI / Behave CLI
+
 Version Control: Git & GitHub
 
-
-## Folder Structure
+Folder Structure
 
 Ved_Bot/
 │
@@ -30,11 +41,14 @@ Ved_Bot/
 │ └── login/ # Login page objects and locators
 │
 ├── TestCases/ # PyTest test classes
+├── Features/ # BDD-related files
+│ ├── *.feature # Feature files describing business scenarios
+│ ├── steps/ # Step definitions mapping Gherkin steps to Python code
+│ └── environment.py # Hooks for setup and teardown (before/after scenario)
 ├── TESTDATA/ # Test data files (Excel, configs)
 ├── Artifacts/ # Generated artifacts
 │ ├── screenshots/ # Failure screenshots
 │ └── Logs/ # Execution logs
-│
 ├── Report/ # Allure report output
 ├── conftest.py # PyTest fixtures & hooks (driver, screenshots, reporting)
 ├── requirements.txt # Project dependencies
