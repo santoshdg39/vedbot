@@ -1,3 +1,4 @@
+from selenium.common import NoSuchElementException
 
 from Pages.BasePage.base_page import BasePage
 
@@ -10,8 +11,7 @@ class DashboardPage(BasePage):
         self.category = category
 
     def is_dashboard_displayed(self):
-        dashboard_page_heading = self.get_text_value(self.dashboardPageLocators.dashboard_page_heading)
+        dashboard_page_heading = self.get_text(self.dashboardPageLocators.dashboard_page_heading)
+        self.log.info(dashboard_page_heading)
         return dashboard_page_heading
-
-
 
