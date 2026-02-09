@@ -22,13 +22,20 @@ class BaseTest:
 
         self.category = request.config.getoption("-m")
 
-        # Detect marker from the test
-        if request.node.get_closest_marker("local"):
-            self.category = "local"
-        elif request.node.get_closest_marker("regression"):
-            self.category = "regression"
+        cli_env = request.config.getoption("--env")
+
+        if cli_env:
+            self.category = cli_env
         else:
-            self.category = "sanity"  # default
+            # fallback to marker on the test
+            if request.node.get_closest_marker("local"):
+                self.category = "local"
+            elif request.node.get_closest_marker("regression"):
+                self.category = "regression"
+            elif request.node.get_closest_marker("sanity"):
+                self.category = "sanity"
+            else:
+                self.category = "local"  # default fallback
 
         self.url = ReadProp.get_config_data("site_config.ini", self.category, "site_url")
 

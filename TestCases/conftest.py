@@ -39,6 +39,7 @@ def pytest_addoption(parser):
     parser.addoption("--browser", action="store", default="chrome", help="browser")
     parser.addoption("--headless", action="store", default="false", help="Run browser in headless mode")
     parser.addoption("--allureReport", action="store", default="true", help="Enable Allure report")
+    parser.addoption("--env", action="store", default="local", help="Test environment to use: local, sanity, regression")
 
 
 @pytest.hookimpl()
